@@ -1,0 +1,24 @@
+node('master')
+{
+    stage('continousDownload')
+    {
+        git 'https://github.com/intelliqittrainings/maven.git'
+    }
+    stage('continousBuild')
+    {
+       sh 'mvn package'
+    }
+    stage('continousDeployment')
+    {
+      deploy adapters: [tomcat9(credentialsId: 'b06e6969-f689-46b5-a5db-f1b120021f97', path: '', url: 'http://172.31.5.68:8080')], contextPath: 'testapp', war: '**/*.war'
+    }
+    stage('continuosTesting')
+    {
+        git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+        sh 'java -jar /home/ubuntu/.jenkins/workspace/scriptedpipeline/testing.jar'
+    }
+    stage('continuosDelivery')
+    {
+      deploy adapters: [tomcat9(credentialsId: 'b06e6969-f689-46b5-a5db-f1b120021f97', path: '', url: 'http://172.31.27.129:8080')], contextPath: 'prodapp', war: '**/*.war'
+    }
+}
